@@ -82,10 +82,10 @@ int main()
     while ( ( (argument_ptr = strsep(&working_string, WHITESPACE ) ) != NULL) && 
               (token_count<MAX_NUM_ARGUMENTS))
     {
-      token[token_count] = strndup( argument_ptr, MAX_COMMAND_SIZE );
+      token[token_count] = strndup( argument_ptr, MAX_COMMAND_SIZE ); //all input gets parsed into token array
       if( strlen( token[token_count] ) == 0 )
       {
-        token[token_count] = NULL;
+        token[token_count] = NULL; 
       }
         token_count++;
     }
@@ -94,12 +94,44 @@ int main()
     // \TODO Remove this for loop and replace with your shell functionality
     //*******************************************************************
 
-    // If user enters command quit or exit, terminate the process.
-    if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
+    //If command is built in - called from parent
+    if(!strcmp(token[0], "!") || !strcmp(token[0], "quit") || !strcmp(token[0], "exit") || !strcmp(token[0], "history") || !strcmp(token[0], "cd"))
     {
-      exit(0);
+      // If user enters command quit or exit, terminate the process.
+      if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
+      {
+        exit(0);
+      }
     }
-    
+
+    //Else if command is forked - called from child
+    else
+    {
+      pid_t child_pid = fork(); // create new child process
+
+      if(child_pid == 0) // child created successfully
+      {
+        int ret = execvp(token[0], &token[0]);
+        if(ret == -1) //exec failed or command not found
+        {
+          printf("%s: Command not found.\n", token[0]);
+        }
+        exit(0);
+      }
+
+      else if(child_pid == -1) //error occurred
+      {
+        exit(0);
+      }
+
+      else // Wait for child process to terminate
+      {
+        int status;
+        wait(&status);
+      }
+    }
+
+
     // int token_index  = 0;
     // for( token_index = 0; token_index < token_count; token_index ++ ) 
     // {
@@ -117,7 +149,6 @@ int main()
     }
 
     free( head_ptr );
-
   }
 
   free( command_string );
