@@ -43,7 +43,7 @@
 int main()
 {
 
-  char * command_string = (char*) malloc( MAX_COMMAND_SIZE );
+  char * command_string = (char*) malloc( MAX_COMMAND_SIZE ); //string with size 255
 
   while( 1 )
   {
@@ -92,12 +92,19 @@ int main()
 
     // Now print the tokenized input as a debug check
     // \TODO Remove this for loop and replace with your shell functionality
+    //*******************************************************************
 
-    int token_index  = 0;
-    for( token_index = 0; token_index < token_count; token_index ++ ) 
+    // If user enters command quit or exit, terminate the process.
+    if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
     {
-      printf("token[%d] = %s\n", token_index, token[token_index] );  
+      exit(0);
     }
+    
+    // int token_index  = 0;
+    // for( token_index = 0; token_index < token_count; token_index ++ ) 
+    // {
+    //   printf("token[%d] = %s\n", token_index, token[token_index] );  
+    // }
 
 
     // Cleanup allocated memory
