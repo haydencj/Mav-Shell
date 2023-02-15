@@ -94,6 +94,12 @@ int main()
     // \TODO Remove this for loop and replace with your shell functionality
     //*******************************************************************
 
+    // TODO:
+    // 1. Allow blanks to be entered with seg fault.
+    // 2. Add history command support
+    // 3. Add '!' command support
+    // 4. Test
+
     //If command is built in - called from parent
     if(!strcmp(token[0], "!") || !strcmp(token[0], "quit") || !strcmp(token[0], "exit") || !strcmp(token[0], "history") || !strcmp(token[0], "cd"))
     {
@@ -101,6 +107,11 @@ int main()
       if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
       {
         exit(0);
+      }
+
+      else if(!strcmp(token[0], "cd"))
+      {
+        chdir(token[1]); // Change directory to path requested by user.
       }
     }
 
@@ -132,6 +143,8 @@ int main()
     }
 
 
+    // Used for testing input tokenizer 
+    
     // int token_index  = 0;
     // for( token_index = 0; token_index < token_count; token_index ++ ) 
     // {
