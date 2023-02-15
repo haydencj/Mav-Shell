@@ -101,19 +101,27 @@ int main()
     // 4. Test
 
     //If command is built in - called from parent
-    if(!strcmp(token[0], "!") || !strcmp(token[0], "quit") || !strcmp(token[0], "exit") || !strcmp(token[0], "history") || !strcmp(token[0], "cd"))
+ 
+    // If user enters command quit or exit, terminate the process.
+    if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
     {
-      // If user enters command quit or exit, terminate the process.
-      if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
-      {
-        exit(0);
-      }
-
-      else if(!strcmp(token[0], "cd"))
-      {
-        chdir(token[1]); // Change directory to path requested by user.
-      }
+      exit(0);
     }
+
+    else if(!strcmp(token[0], "cd"))
+    {
+      chdir(token[1]); // Change directory to path requested by user.
+    }
+    
+    // else if(!strcmp(token[0], "history"))
+    // {
+
+    // }
+
+    // else if(!strcmp(token[0], "!"))
+    // {
+
+    // }
 
     //Else if command is forked - called from child
     else
@@ -142,7 +150,6 @@ int main()
       }
     }
 
-
     // Used for testing input tokenizer 
     
     // int token_index  = 0;
@@ -150,7 +157,6 @@ int main()
     // {
     //   printf("token[%d] = %s\n", token_index, token[token_index] );  
     // }
-
 
     // Cleanup allocated memory
     for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
