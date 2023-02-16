@@ -43,7 +43,7 @@
 int main()
 {
 
-  char * command_string = (char*) malloc( MAX_COMMAND_SIZE );
+  char * command_string = (char*) malloc( MAX_COMMAND_SIZE ); //string with size 255
 
   while( 1 )
   {
@@ -82,23 +82,81 @@ int main()
     while ( ( (argument_ptr = strsep(&working_string, WHITESPACE ) ) != NULL) && 
               (token_count<MAX_NUM_ARGUMENTS))
     {
-      token[token_count] = strndup( argument_ptr, MAX_COMMAND_SIZE );
+      token[token_count] = strndup( argument_ptr, MAX_COMMAND_SIZE ); //all input gets parsed into token array
       if( strlen( token[token_count] ) == 0 )
       {
-        token[token_count] = NULL;
+        token[token_count] = NULL; 
       }
         token_count++;
     }
 
     // Now print the tokenized input as a debug check
     // \TODO Remove this for loop and replace with your shell functionality
+    //*******************************************************************
 
-    int token_index  = 0;
-    for( token_index = 0; token_index < token_count; token_index ++ ) 
+    // TODO:
+    // 1. Allow blanks to be entered with seg fault.
+    // 2. Add history command support
+    // 3. Add '!' command support
+    // 4. Test
+
+    //If command is built in - called from parent
+ 
+    // If user enters command quit or exit, terminate the process.
+    if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
     {
-      printf("token[%d] = %s\n", token_index, token[token_index] );  
+      exit(0);
     }
 
+    else if(!strcmp(token[0], "cd"))
+    {
+      chdir(token[1]); // Change directory to path requested by user.
+    }
+    
+    // else if(!strcmp(token[0], "history"))
+    // {
+
+    // }
+
+    // else if(!strcmp(token[0], "!"))
+    // {
+
+    // }
+
+    //Else if command is forked - called from child
+    else
+    {
+      pid_t child_pid = fork(); // create new child process
+
+      if(child_pid == 0) // child created successfully
+      {
+        int ret = execvp(token[0], &token[0]);
+        if(ret == -1) //exec failed or command not found
+        {
+          printf("%s: Command not found.\n", token[0]);
+        }
+        exit(0);
+      }
+
+      else if(child_pid == -1) //error occurred
+      {
+        exit(0);
+      }
+
+      else // Wait for child process to terminate
+      {
+        int status;
+        wait(&status);
+      }
+    }
+
+    // Used for testing input tokenizer 
+    
+    // int token_index  = 0;
+    // for( token_index = 0; token_index < token_count; token_index ++ ) 
+    // {
+    //   printf("token[%d] = %s\n", token_index, token[token_index] );  
+    // }
 
     // Cleanup allocated memory
     for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
@@ -110,7 +168,6 @@ int main()
     }
 
     free( head_ptr );
-
   }
 
   free( command_string );
