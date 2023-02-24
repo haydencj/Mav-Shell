@@ -37,8 +37,11 @@
                                 // will separate the tokens on our command line
 
 #define MAX_COMMAND_SIZE 255    // The maximum command-line size
-
+#define MAX_HISTORY 15
 #define MAX_NUM_ARGUMENTS 5     // Mav shell only supports four arguments
+
+char history[MAX_HISTORY][MAX_COMMAND_SIZE];
+int history_size = 0;
 
 int main()
 {
@@ -95,10 +98,18 @@ int main()
     //*******************************************************************
 
     // TODO:
-    // 1. Allow blanks to be entered with seg fault.
+    // 1. Allow blanks to be entered without seg fault.
     // 2. Add history command support
     // 3. Add '!' command support
     // 4. Test
+
+    // if(history_size == MAX_HISTORY)
+    // {
+    //   history_size--;
+    // }
+
+    strcpy(history[history_size], command_string);
+    history_size++;
 
     //If command is built in - called from parent
  
@@ -113,10 +124,13 @@ int main()
       chdir(token[1]); // Change directory to path requested by user.
     }
     
-    // else if(!strcmp(token[0], "history"))
-    // {
-
-    // }
+    else if(!strcmp(token[0], "history"))
+    {
+      for(int i = 0; i<history_size; i++)
+      {
+        printf("%d. %s", i, history[i]);
+      }
+    }
 
     // else if(!strcmp(token[0], "!"))
     // {
