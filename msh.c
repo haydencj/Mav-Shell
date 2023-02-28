@@ -111,10 +111,15 @@ int main()
     strcpy(history[history_size], command_string);
     history_size++;
 
+    //If blank is entered, continue.
+    if(token[0] == NULL) {
+      continue;
+    }
+
     //If command is built in - called from parent
  
     // If user enters command quit or exit, terminate the process.
-    if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
+    else if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
     {
       exit(0);
     }
@@ -163,14 +168,6 @@ int main()
         wait(&status);
       }
     }
-
-    // Used for testing input tokenizer 
-    
-    // int token_index  = 0;
-    // for( token_index = 0; token_index < token_count; token_index ++ ) 
-    // {
-    //   printf("token[%d] = %s\n", token_index, token[token_index] );  
-    // }
 
     // Cleanup allocated memory
     for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
