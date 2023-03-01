@@ -42,11 +42,11 @@
 
 char history[MAX_HISTORY][MAX_COMMAND_SIZE];
 int history_size = 0;
-pid_t pids[MAX_HISTORY];
+pid_t pids[MAX_HISTORY] = {-1, -1, -1, -1, -1 , -1, -1, -1, -1, -1 , -1, -1, -1, -1, -1};
+int pids_size = 0;
 
 int main()
 {
-
   char * command_string = (char*) malloc( MAX_COMMAND_SIZE ); //string with size 255
 
   while( 1 )
@@ -60,6 +60,23 @@ int main()
     // inputs something since fgets returns NULL when there
     // is no input
     while( !fgets (command_string, MAX_COMMAND_SIZE, stdin) );
+
+    // Check if cmd starts with !. If so tokenize and take value after !(n) and the save the value stored at history[n] in cmd string.
+    if(command_string[0] == '!')
+    {
+      char* token = strtok(command_string, "!");
+      int value = atoi(token);
+
+      if(value < history_size)
+      {
+        command_string = history[value];
+      }
+      else
+      {
+        printf("Command not in history.\n");
+        continue;
+      }
+    }
 
     /* Parse input */
     char *token[MAX_NUM_ARGUMENTS];
@@ -95,15 +112,14 @@ int main()
     }
 
     //*******************************************************************
-    // TODO:
-    // 1. Add history command support
-    // 2. Add '!' command support
-    // 3. Test
-
+    
     // If blank is entered, continue.
     if(token[0] == NULL) {
       continue;
     }
+
+    // Pid used to keep pid after parent terminates child
+    pid_t saved_pid;
 
 
     // If history is full, move all elements in array to left by one, then add current command to last element in array.
@@ -119,30 +135,41 @@ int main()
     else
     {
       strcpy(history[history_size], command_string);
-      if(history_size != MAX_HISTORY){
-        history_size++;
-      }
+      history_size++;
     }
 
 
+    // Works identical to history above
+    if(pids_size == MAX_HISTORY)
+    {
+      for(int i = 0; i < MAX_HISTORY; i++)
+      {
+        pids[i] = pids[i+1];
+      }
+      pids[pids_size-1] = saved_pid;
+    }
+
+
+    // Set saved pids to -1 for built in commands. Will change to actual pid after forking.
+    saved_pid = -1;
+
     // If command is built in - called from parent
+
     // If user enters command quit or exit, terminate the process.
     if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
     {
-      pids[history_size] = -1;
       exit(0);
     }
 
+    // Change directory to path requested by user.
     else if(!strcmp(token[0], "cd"))
     {
-      pids[history_size] = -1;
-      chdir(token[1]); // Change directory to path requested by user.
+      chdir(token[1]); 
     }
     
+    // Print history of cmds or cmds with pids if -p argument is entered.
     else if(!strcmp(token[0], "history"))
-    {
-      pids[history_size] = -1;
-
+    { 
       if(token[1] == NULL)
       {
         for(int i = 0; i<history_size; i++)
@@ -159,7 +186,6 @@ int main()
         }
       }
     }
-
 
     // Else if command is forked - called from child
     else
@@ -185,8 +211,16 @@ int main()
       {
         int status;
         wait(&status);
-        pids[history_size] = child_pid;
+        saved_pid = child_pid;
       }
+    }
+
+
+    // Works identical to history above.
+    if(pids_size != MAX_HISTORY)
+    {
+      pids[pids_size] = saved_pid;
+      pids_size++;
     }
 
 
