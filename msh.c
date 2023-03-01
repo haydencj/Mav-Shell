@@ -42,6 +42,7 @@
 
 char history[MAX_HISTORY][MAX_COMMAND_SIZE];
 int history_size = 0;
+pid_t pids[MAX_HISTORY];
 
 int main()
 {
@@ -93,56 +94,74 @@ int main()
         token_count++;
     }
 
-    // Now print the tokenized input as a debug check
-    // \TODO Remove this for loop and replace with your shell functionality
     //*******************************************************************
-
     // TODO:
-    // 1. Allow blanks to be entered without seg fault.
-    // 2. Add history command support
-    // 3. Add '!' command support
-    // 4. Test
+    // 1. Add history command support
+    // 2. Add '!' command support
+    // 3. Test
 
-    // if(history_size == MAX_HISTORY)
-    // {
-    //   history_size--;
-    // }
-
-    strcpy(history[history_size], command_string);
-    history_size++;
-
-    //If blank is entered, continue.
+    // If blank is entered, continue.
     if(token[0] == NULL) {
       continue;
     }
 
-    //If command is built in - called from parent
- 
-    // If user enters command quit or exit, terminate the process.
-    else if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
+
+    // If history is full, move all elements in array to left by one, then add current command to last element in array.
+    if(history_size == MAX_HISTORY)
     {
+      for(int i = 0; i < MAX_HISTORY; i++)
+      {
+        strcpy(history[i], history[i+1]);
+      }
+      strcpy(history[history_size-1], command_string);
+    }
+    // If history is not full, store command in history array. Once history is full, don't increase size.
+    else
+    {
+      strcpy(history[history_size], command_string);
+      if(history_size != MAX_HISTORY){
+        history_size++;
+      }
+    }
+
+
+    // If command is built in - called from parent
+    // If user enters command quit or exit, terminate the process.
+    if(!strcmp(token[0], "quit") || !strcmp(token[0], "exit")) 
+    {
+      pids[history_size] = -1;
       exit(0);
     }
 
     else if(!strcmp(token[0], "cd"))
     {
+      pids[history_size] = -1;
       chdir(token[1]); // Change directory to path requested by user.
     }
     
     else if(!strcmp(token[0], "history"))
     {
-      for(int i = 0; i<history_size; i++)
+      pids[history_size] = -1;
+
+      if(token[1] == NULL)
       {
-        printf("%d. %s", i, history[i]);
+        for(int i = 0; i<history_size; i++)
+        {
+          printf("%d. %s", i, history[i]);
+        }
+      }
+
+      else if(!strcmp(token[1], "-p"))
+      {
+        for(int i = 0; i<history_size; i++)
+        {
+          printf("%d. [%d] %s", i, pids[i], history[i]);
+        }
       }
     }
 
-    // else if(!strcmp(token[0], "!"))
-    // {
 
-    // }
-
-    //Else if command is forked - called from child
+    // Else if command is forked - called from child
     else
     {
       pid_t child_pid = fork(); // create new child process
@@ -166,8 +185,10 @@ int main()
       {
         int status;
         wait(&status);
+        pids[history_size] = child_pid;
       }
     }
+
 
     // Cleanup allocated memory
     for( int i = 0; i < MAX_NUM_ARGUMENTS; i++ )
